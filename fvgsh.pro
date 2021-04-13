@@ -5,8 +5,12 @@ CONFIG -= qt
 
 SOURCES += \
         src/main.c \
-        src/sighandler.c
+        src/sighandler.c \
+        src/strutils.c \
+        src/userdata.c
 
 HEADERS += \
     src/sighandler.h \
-    src/types.h
+    src/strutils.h \
+    src/types.h \
+    src/userdata.h
