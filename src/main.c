@@ -3,7 +3,6 @@
 #include "sighandler.h"
 #include "userdata.h"
 
-
 #define RED_ANSI     "\x1b[31m" // ANSI escape code for red
 #define BLUE_ANSI    "\x1b[34m" // ANSI escape code for blue
 #define RESET_ANSI   "\x1b[0m"  // ANSI escape code to reset stdout's color
@@ -23,9 +22,16 @@ int main()
     char ch;
 
     while(!g_should_exit) {
+
         // line is initialized filled with \0
         char line[ARG_MAX] = { '\0' };
         print_prompt(&ud);
+
+        // Checking for EOF
+        if (feof(stdin)) {
+            fprintf(stderr, "EOF read. Exiting.\n");
+            break;
+        }
 
         for(int i = 0;
             (i < ARG_MAX - 1)                  // Make sure our buffer isn't bigger than ARG_MAX

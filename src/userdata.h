@@ -3,8 +3,7 @@
 
 #include "types.h" // For PATH_MAX
 
-struct user_data_s
-{
+struct user_data_s {
     //! User's... username
     char * username;
     //! User's hostname
