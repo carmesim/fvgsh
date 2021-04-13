@@ -9,7 +9,6 @@
 #   define ARG_MAX 4096 // minimum acceptable value according to the POSIX standard
 #endif
 
-
 #ifdef __STDC_VERSION__
 // __STDC_VERSION__ is defined from C99 and up
 #   include <stdbool.h>
