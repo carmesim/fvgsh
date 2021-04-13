@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "types.h"
 #include "sighandler.h"
 #include "userdata.h"
@@ -44,6 +45,10 @@ int main()
 
         printf("line: %s\n", line);
     }
+
+    // Freeing malloc'd memory
+    free(ud.pretty_cwd);
+    free(ud.username);
 
     return 0;
 }

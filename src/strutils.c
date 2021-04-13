@@ -4,7 +4,7 @@
 
 void get_pretty_cwd(char *src, char * str)
 {
-    char * rep = "~";
+    const char * rep = "~";
     char *p = strstr(src, str);
     do
     {
