@@ -1,0 +1,5 @@
+*.pro.user
+.qmake.stash
+Makefile
+fvgsh
+*.o
