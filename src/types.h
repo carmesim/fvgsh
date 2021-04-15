@@ -4,12 +4,11 @@
 #include <limits.h>
 
 #ifndef ARG_MAX
-#   include <unistd.h> // For sysconf
 #   define ARG_MAX 4096 // minimum acceptable value according to the POSIX standard
 #endif
 
 #ifndef PATH_MAX
-#   define 4096
+#   define PATH_MAX ARG_MAX
 #endif
 
 #ifdef __STDC_VERSION__
