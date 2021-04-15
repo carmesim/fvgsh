@@ -6,27 +6,25 @@ void get_pretty_cwd(char *src, char * str)
 {
     const char * rep = "~";
     char *p = strstr(src, str);
-    do
+    if(p)   // If the substring was found
     {
-        if(p)   // If the substring was found
+        char buf[1024] = {'\0'};
+
+        if(src == p)
         {
-            char buf[1024] = {'\0'};
-
-            if(src == p)
-            {
-                strcpy(buf, rep);
-                strcat(buf, p+strlen(str));
-            }
-            else
-            {
-                strncpy(buf,src, strlen(src) - strlen(p));
-                strcat(buf,rep);
-                strcat(buf, p + strlen(str));
-            }
-
-            memset(src,'\0', strlen(src));
-            strcpy(src, buf);
+            strcpy(buf, rep);
+            strcat(buf, p+strlen(str));
+        }
+        else
+        {
+            strncpy(buf,src, strlen(src) - strlen(p));
+            strcat(buf,rep);
+            strcat(buf, p + strlen(str));
         }
 
-    }while(p && (p = strstr(src, str)));
+        memset(src,'\0', strlen(src));
+        strcpy(src, buf);
+        printf("haha:%s\n", src);
+    }
+
 }
