@@ -1,7 +1,7 @@
 #ifndef SIGHANDLER_H
 #define SIGHANDLER_H
 
-#include "types.h" // For bool
+#include "basictypes.h" // For bool
 
 void init_signal_handler();
 

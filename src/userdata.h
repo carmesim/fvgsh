@@ -1,7 +1,7 @@
 #ifndef USERDATA_H
 #define USERDATA_H
 
-#include "types.h" // For PATH_MAX
+#include "basictypes.h" // For PATH_MAX
 
 struct user_data_s {
     //! User's... username
