@@ -8,7 +8,7 @@ SOURCES += \
         src/main.c \
         src/sighandler.c \
         src/strutils.c \
-        src/tokens.c \
+        src/strvec.c \
         src/userdata.c
 
 HEADERS += \
@@ -16,5 +16,5 @@ HEADERS += \
     src/command.h \
     src/sighandler.h \
     src/strutils.h \
-    src/tokens.h \
+    src/strvec.h \
     src/userdata.h

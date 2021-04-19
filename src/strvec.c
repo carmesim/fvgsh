@@ -1,17 +1,21 @@
-#include "tokens.h"
+#include "strvec.h"
 #include "stdlib.h"
 #include "string.h"
 #include "stdio.h"
 
-static tokens_t tok_new() {
-    tokens_t tokens;
+static str_vec_t vec_new() {
+    str_vec_t tokens;
     tokens.data = malloc(5 * sizeof (char *));
+    if (!tokens.data) {
+        fprintf(stderr, "fatal error: malloc failed in vec_new\n");
+        exit(1);
+    }
     tokens.size = 0;
     tokens.capacity = 5;
     return tokens;
 }
 
-tokens_t tok_free(tokens_t tokens) {
+str_vec_t vec_free(str_vec_t tokens) {
     for (usize_t i = 0; i < tokens.size; i++) {
         free(tokens.data[i]);
     }
@@ -20,7 +24,7 @@ tokens_t tok_free(tokens_t tokens) {
     return tokens;
 }
 
-int tok_insert(tokens_t * tokens, const char * token) {
+int vec_insert(str_vec_t * tokens, const char * token) {
     if (tokens->capacity > tokens->size) {
         tokens->data[tokens->size++] = strdup(token);
         return 0;
@@ -38,19 +42,19 @@ int tok_insert(tokens_t * tokens, const char * token) {
     return 0;
 }
 
-tokens_t parse_tokens(char * line) {
+str_vec_t tokenize(char * line) {
 
-    tokens_t tokens = tok_new();
+    str_vec_t tokens = vec_new();
 
     // Context pointer for strtok_r
     char * ctx;
 
-    char * token = strtok_r(line, " ", &ctx);
-    tok_insert(&tokens, token);
-
-    while ((token = strtok_r(NULL, " ", &ctx)))
-    {
-        tok_insert(&tokens, token);
+    for (
+        char * token = strtok_r(line, " ", &ctx);
+        token;
+        token = strtok_r(NULL, " ", &ctx)
+        ) {
+        vec_insert(&tokens, token);
     }
 
     return tokens;

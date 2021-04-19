@@ -3,9 +3,9 @@
 
 #include "basictypes.h"   //
 
-typedef struct tokens_s tokens_t;
+typedef struct str_vec_s str_vec_t;
 
-struct tokens_s {
+struct str_vec_s {
     //! The actual array of tokens that the struct contains
     char ** data;
 
@@ -16,7 +16,7 @@ struct tokens_s {
     usize_t size;
 };
 
-tokens_t parse_tokens(char *);
-tokens_t tok_free(tokens_t);
+str_vec_t tokenize(char *);
+str_vec_t vec_free(str_vec_t);
 
 #endif // TOKENS_H
