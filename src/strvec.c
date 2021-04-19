@@ -15,13 +15,25 @@ static str_vec_t vec_new() {
     return tokens;
 }
 
-str_vec_t vec_free(str_vec_t tokens) {
+void vec_free(str_vec_t tokens) {
     for (usize_t i = 0; i < tokens.size; i++) {
         free(tokens.data[i]);
     }
     free(tokens.data);
     tokens.capacity = 0;
-    return tokens;
+}
+
+//! reserve_more allocates an additional amount of bytes to a pre-existing str_vec_t
+int reserve_more(str_vec_t * tokens, const usize_t additional_strs) {
+    tokens->capacity += additional_strs;
+    char ** tmp = realloc(tokens->data, tokens->capacity * sizeof (char *));
+    if (!tmp) {
+        fprintf(stderr, "realloc failed in reserve_more\n");
+        tokens->capacity -= additional_strs;
+        return 1;
+    }
+    tokens->data = tmp;
+    return 0;
 }
 
 int vec_insert(str_vec_t * tokens, const char * token) {
@@ -30,14 +42,11 @@ int vec_insert(str_vec_t * tokens, const char * token) {
         return 0;
     }
 
-    tokens->capacity += sizeof (char *);
-    char ** tmp = realloc(tokens->data, tokens->capacity);
-    if (!tmp) {
-        fprintf(stderr, "realloc failed in tok_insert");
-        tokens->capacity -= sizeof (char *);
+    if (reserve_more(tokens, 1)) {
+        fprintf(stderr, "reserve_more failed in vec_insert\n");
         return 1;
     }
-    tokens->data = tmp;
+
     tokens->data[tokens->size++] = strdup(token);
     return 0;
 }

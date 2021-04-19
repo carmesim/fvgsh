@@ -17,6 +17,7 @@ struct str_vec_s {
 };
 
 str_vec_t tokenize(char *);
-str_vec_t vec_free(str_vec_t);
+void vec_free(str_vec_t);
+int reserve_more(str_vec_t *, const usize_t);
 
 #endif // TOKENS_H
