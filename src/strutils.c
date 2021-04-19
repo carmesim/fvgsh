@@ -1,7 +1,6 @@
 #include "strutils.h"
 #include <string.h>
 
-
 void get_pretty_cwd(char *src, char * str)
 {
     const char * rep = "~";
@@ -24,7 +23,5 @@ void get_pretty_cwd(char *src, char * str)
 
         memset(src,'\0', strlen(src));
         strcpy(src, buf);
-        printf("haha:%s\n", src);
     }
-
 }
