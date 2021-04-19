@@ -42,7 +42,4 @@ struct command_s {
     fd_t output;
 };
 
-void parse_line(char *);
-
-
 #endif // COMMAND_H

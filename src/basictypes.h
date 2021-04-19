@@ -19,6 +19,7 @@ typedef uint32_t usize_t;
 typedef uint64_t usize_t;
 #else
 #   warning "Could not detect memory address width. Assuming 64 bits."
+typedef uint64_t usize_t;
 #endif
 
 #ifdef __STDC_VERSION__
