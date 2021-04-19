@@ -2,6 +2,7 @@
 #define BASICTYPES_H
 
 #include <limits.h>
+#include <stdint.h>
 
 #ifndef ARG_MAX
 #   define ARG_MAX 4096 // minimum acceptable value according to the POSIX standard
@@ -9,6 +10,15 @@
 
 #ifndef PATH_MAX
 #   define PATH_MAX ARG_MAX
+#endif
+
+
+#if UINTPTR_MAX == 0xffffffff
+typedef uint32_t usize_t;
+#elif UINTPTR_MAX == 0xffffffffffffffff
+typedef uint64_t usize_t;
+#else
+#   warning "Could not detect memory address width. Assuming 64 bits."
 #endif
 
 #ifdef __STDC_VERSION__
