@@ -10,6 +10,7 @@ SOURCES += \
         src/userdata.c
 
 HEADERS += \
+    src/command.h \
     src/sighandler.h \
     src/strutils.h \
     src/types.h \
