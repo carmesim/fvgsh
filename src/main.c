@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "types.h"
-#include "sighandler.h"
-#include "userdata.h"
+#include "basictypes.h"  // For ARG_MAX
+#include "sighandler.h"  // For init_signal_handler
+#include "userdata.h"    // For user_data_t, get_user_data
+#include "command.h"     // For parse_line
+#include "strvec.h"
 
 #define RED_ANSI     "\x1b[31m" // ANSI escape code for red
 #define BLUE_ANSI    "\x1b[34m" // ANSI escape code for blue
@@ -43,7 +45,15 @@ int main()
             line[i] = ch;
         }
 
-        printf("line: %s\n", line);
+        if (line[0] == '\0') {
+            continue;
+        }
+
+        str_vec_t tokens = tokenize(line);
+        for (usize_t i = 0; i < tokens.size; i++) {
+            printf("Token: %s\n", tokens.data[i]);
+        }
+        vec_free(tokens);
     }
 
     // Freeing malloc'd memory

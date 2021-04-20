@@ -1,5 +1,5 @@
 #include "sighandler.h"
-#include "types.h"
+#include "basictypes.h"
 
 #include <signal.h>   // For struct sigaction, sigemptyset, SIGINT, SIGHUP
 #include <stdio.h>    // for fprintf, stderr

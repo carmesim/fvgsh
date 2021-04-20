@@ -4,13 +4,17 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
+        src/command.c \
         src/main.c \
         src/sighandler.c \
         src/strutils.c \
+        src/strvec.c \
         src/userdata.c
 
 HEADERS += \
+    src/basictypes.h \
+    src/command.h \
     src/sighandler.h \
     src/strutils.h \
-    src/types.h \
+    src/strvec.h \
     src/userdata.h
