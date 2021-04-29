@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
+#include <wait.h>
 #include "basictypes.h"  // For ARG_MAX
 #include "sighandler.h"  // For init_signal_handler
 #include "userdata.h"    // For user_data_t, get_user_data
@@ -53,6 +57,35 @@ int main()
         for (usize_t i = 0; i < tokens.size; i++) {
             printf("Token: %s\n", tokens.data[i]);
         }
+
+//================= TEMPORARY STUFF =======================
+// MAYBE WE SHOULD MOVE THIS TO A FUNCTION IN THE FUTURE
+
+        int pid = fork();
+        if(pid == 0){ //child process
+            /*
+            char* vec[]={
+                "las",
+                "-la",
+                NULL
+            };
+
+            execlp(vec[0],vec[0],vec[1],NULL);
+
+            */
+            char lastch = tokens.data[tokens.size-1][strlen(tokens.data[tokens.size-1])-1];
+            printf("Último char: %c\n",lastch);
+            //if(lastch == '&'){
+                //lidar com execução em background
+            //}
+            int status = execvp(tokens.data[0],tokens.data);
+            if (status == -1){
+                printf("Erro! Código do erro:%d\n",errno);
+            }
+        }else{//parent process
+            wait(NULL);
+        }
+// =================================================================
         vec_free(tokens);
     }
 
