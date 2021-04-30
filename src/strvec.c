@@ -15,6 +15,13 @@ static str_vec_t vec_new() {
     return tokens;
 }
 
+void append_null(str_vec_t * vec) {
+    if (vec->capacity == vec->size) {
+        reserve_more(vec, 1);
+    }
+    vec->data[vec->size] = NULL;
+}
+
 void vec_free(str_vec_t tokens) {
     for (usize_t i = 0; i < tokens.size; i++) {
         free(tokens.data[i]);
