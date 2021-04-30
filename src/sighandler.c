@@ -6,11 +6,15 @@
 
 struct sigaction signal_action;
 
-// Extern variable defined in sighandler.h
+// Extern variables defined in sighandler.h
 bool g_should_exit = false;
+bool g_waiting_for_child_proc = false;
 
 void signal_handler(int sig)
 {
+    if (g_waiting_for_child_proc) {
+        return;
+    }
     if (sig==SIGINT || sig==SIGHUP)
     {
         fprintf(stderr, "\nSIGINT (Ctrl+C) received. Code %d. Exiting.", sig);

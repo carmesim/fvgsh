@@ -1,9 +1,9 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-#include <wait.h>
+#include <stdlib.h>      // For free
+#include <string.h>      // For strlen
+#include <unistd.h>      // For fork, execvp
+#include <errno.h>       // For errno
+#include <wait.h>        // For wait
 #include "basictypes.h"  // For ARG_MAX
 #include "sighandler.h"  // For init_signal_handler
 #include "userdata.h"    // For user_data_t, get_user_data
@@ -28,7 +28,7 @@ int main()
 
     char ch;
 
-    while(!g_should_exit) {
+    while(!g_should_exit && !g_waiting_for_child_proc) {
 
         // line is initialized filled with \0
         char line[ARG_MAX] = { '\0' };
@@ -65,8 +65,8 @@ int main()
 // MAYBE WE SHOULD MOVE THIS TO A FUNCTION IN THE FUTURE
 
         int pid = fork();
-        if(pid == 0){ //child process
-
+        if(pid == 0){
+            //child process
             char lastch = tokens.data[tokens.size-1][strlen(tokens.data[tokens.size-1])-1];
             printf("Último char: %c\n",lastch);
             //if(lastch == '&'){
@@ -74,13 +74,17 @@ int main()
             //}
             int status = execvp(tokens.data[0], tokens.data);
             if (status == -1){
-                printf("Erro! Código do erro:%d\n",errno);
+                printf("Erro! Código do erro:%d\n", errno);
             }
-        }else{//parent process
+        }else{
+            //parent process
+            g_waiting_for_child_proc = true;
             wait(NULL);
         }
 // =================================================================
         vec_free(tokens);
+        g_waiting_for_child_proc = false;
+        fflush(stdout);
     }
 
     // Freeing malloc'd memory
