@@ -67,22 +67,22 @@ int main()
         int pid = fork();
         if(pid == 0){
             //child process
-            char lastch = tokens.data[tokens.size-1][strlen(tokens.data[tokens.size-1])-1];
-            printf("Último char: %c\n",lastch);
-            //if(lastch == '&'){
-                //lidar com execução em background
-            //}
+            char * last_token = tokens.data[tokens.size-1];
+            char last_char = last_token[strlen(last_token)];
+            if (last_char == '&') {
+                // TODO: background execution
+            }
             int status = execvp(tokens.data[0], tokens.data);
             if (status == -1){
                 printf("Erro! Código do erro:%d\n", errno);
             }
-        }else{
+        } else {
             //parent process
             g_waiting_for_child_proc = true;
             wait(NULL);
         }
 // =================================================================
-        vec_free(tokens);
+        vec_free(&tokens);
         g_waiting_for_child_proc = false;
         fflush(stdout);
     }

@@ -22,12 +22,13 @@ void append_null(str_vec_t * vec) {
     vec->data[vec->size] = NULL;
 }
 
-void vec_free(str_vec_t tokens) {
-    for (usize_t i = 0; i < tokens.size; i++) {
-        free(tokens.data[i]);
+void vec_free(str_vec_t * tokens) {
+    for (usize_t i = 0; i < tokens->size; i++) {
+        free(tokens->data[i]);
     }
-    free(tokens.data);
-    tokens.capacity = 0;
+    free(tokens->data);
+    tokens->capacity = 0;
+    tokens->size = 0;
 }
 
 //! reserve_more allocates an additional amount of bytes to a pre-existing str_vec_t
