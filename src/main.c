@@ -69,6 +69,14 @@ int main()
             //child process
             char * last_token = tokens.data[tokens.size-1];
             char last_char = last_token[strlen(last_token)];
+            /*
+                TODO: handle "|" "<" ">"
+                    
+                design a logic that uses dup2 to overwrite
+                the standard inputs and outputs to file descriptors
+                associated with pipes (chain of commands)
+
+            */
             if (last_char == '&') {
                 // TODO: background execution
             }
