@@ -14,6 +14,10 @@
 #define BLUE_ANSI    "\x1b[34m" // ANSI escape code for blue
 #define RESET_ANSI   "\x1b[0m"  // ANSI escape code to reset stdout's color
 
+
+
+const char* command_types_str[] = { [Piped] = "Piped", [Logical] = "Logical", [Sequential] = "Sequential", [Regular] = "Regular" };
+
 static inline void print_prompt(const user_data_t * ud)
 {
     printf(BLUE_ANSI "%s@%s:" RED_ANSI "%s" BLUE_ANSI "$ " RESET_ANSI, ud->username, ud->hostname, ud->pretty_cwd);
@@ -32,13 +36,14 @@ int main()
 
         // line is initialized filled with \0
         char line[ARG_MAX] = { '\0' };
-        print_prompt(&ud);
 
         // Checking for EOF
         if (feof(stdin)) {
             fprintf(stderr, "EOF read. Exiting.\n");
             break;
         }
+
+        print_prompt(&ud);
 
         for(int i = 0;
             (i < ARG_MAX - 1)                  // Make sure our buffer isn't bigger than ARG_MAX
@@ -52,6 +57,10 @@ int main()
         if (line[0] == '\0') {
             continue;
         }
+
+        command_type_t cmd_type = parse_command_type(line);
+
+        printf("Command type: %s\n", command_types_str[cmd_type]);
 
         str_vec_t tokens = tokenize(line);
         for (usize_t i = 0; i < tokens.size; i++) {

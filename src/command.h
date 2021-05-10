@@ -6,6 +6,7 @@
 typedef struct command_s command_t;
 typedef struct fd_s fd_t;
 typedef struct output_s output_t;
+typedef enum command_type command_type_t;
 
 //! An abstract "file descriptor"
 //! May represent a Unix file descriptor or a file path
@@ -41,5 +42,14 @@ struct command_s {
     //! What the binary will write to
     fd_t output;
 };
+
+enum command_type {
+    Piped,
+    Logical,
+    Sequential,
+    Regular
+};
+
+command_type_t parse_command_type(const char *);
 
 #endif // COMMAND_H
