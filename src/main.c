@@ -15,8 +15,12 @@
 #define RESET_ANSI   "\x1b[0m"  // ANSI escape code to reset stdout's color
 
 
-
-const char* command_types_str[] = { [Piped] = "Piped", [Logical] = "Logical", [Sequential] = "Sequential", [Regular] = "Regular" };
+const char* command_types_str[] = {
+    [Piped] = "Piped",
+    [Logical] = "Logical",
+    [Sequential] = "Sequential",
+    [Regular] = "Regular"
+};
 
 static inline void print_prompt(const user_data_t * ud)
 {
@@ -62,7 +66,7 @@ int main()
 
         printf("Command type: %s\n", command_types_str[cmd_type]);
 
-        str_vec_t tokens = tokenize(line);
+        str_vec_t tokens = tokenize(line, " ");
         for (usize_t i = 0; i < tokens.size; i++) {
             printf("Token: %s\n", tokens.data[i]);
         }
@@ -90,7 +94,7 @@ int main()
                 // TODO: background execution
             }
             int status = execvp(tokens.data[0], tokens.data);
-            if (status == -1){
+            if (status == -1) {
                 printf("Erro! Código do erro:%d\n", errno);
             }
         } else {

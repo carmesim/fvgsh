@@ -59,7 +59,7 @@ int vec_insert(str_vec_t * tokens, const char * token) {
     return 0;
 }
 
-str_vec_t tokenize(char * line) {
+str_vec_t tokenize(char * line, const char * sep) {
 
     str_vec_t tokens = vec_new();
 
@@ -67,9 +67,9 @@ str_vec_t tokenize(char * line) {
     char * ctx;
 
     for (
-        char * token = strtok_r(line, " ", &ctx);
+        char * token = strtok_r(line, sep, &ctx);
         token;
-        token = strtok_r(NULL, " ", &ctx)
+        token = strtok_r(NULL, sep, &ctx)
         ) {
         vec_insert(&tokens, token);
     }
