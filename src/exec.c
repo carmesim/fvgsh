@@ -120,6 +120,7 @@ int exec_piped_commands(char * line) {
 
 
     free(file_descriptors);
+    vec_free(&commands);
     return status_code;
 }
 
