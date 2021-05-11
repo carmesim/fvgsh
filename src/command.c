@@ -3,20 +3,39 @@
 #include "stdlib.h"    // For malloc
 #include "stdio.h"     // For printf, putchar
 
+#define STR(x) #x
+
 static inline bool contains(const char * haystack, const char * needle) {
     return !!strstr(haystack, needle);
 }
 
+static inline bool xor_3(bool a, bool b, bool c) {
+    return (a?1:0) + (b?1:0) + (c?1:0) == 1;
+}
+
 command_type_t parse_command_type(const char * line) {
-    if (contains(line, " | ")) {
+
+    bool piped = contains(line, " | ");
+    bool or = contains(line, " || ");
+    bool and = contains(line, " && ");
+    bool seq = contains(line, ";");
+    bool logical = and || or;
+    bool regular = !piped && !logical && !seq;
+
+    if(!regular && !xor_3(piped, seq, logical)) {
+        // TODO: por algum motivo issaqui não funciona ainda ;-;
+        return Malformed;
+    }
+
+    if (piped) {
         return Piped;
     }
 
-    if (contains(line, " || ") || contains(line, " && ")) {
+    if (logical) {
         return Logical;
     }
 
-    if (contains(line, ";")) {
+    if (seq) {
         return Sequential;
     }
 

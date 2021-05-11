@@ -16,7 +16,8 @@ const char* command_types_str[] = {
     [Piped] = "Piped",
     [Logical] = "Logical",
     [Sequential] = "Sequential",
-    [Regular] = "Regular"
+    [Regular] = "Regular",
+    [Malformed] = "Malformed"
 };
 
 static inline void print_prompt(const user_data_t * ud)
@@ -64,9 +65,10 @@ int main()
         printf("Command type: %s\n", command_types_str[cmd_type]);
 
         switch (cmd_type) {
-            case Piped: /* TODO! */ break;
+            case Piped: exec_piped_commands(line); break;
             case Sequential: /* TODO! */ break;
             case Logical: /* TODO! */ break;
+            case Malformed: fprintf(stderr, "fvgsh: erro: no momento não é possível mistura de operadores além de '&&' com '||'.\n"); break;
             case Regular: exec_simple_command(line); break;
         }
 

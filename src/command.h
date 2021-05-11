@@ -47,6 +47,7 @@ enum command_type {
     Piped,
     Logical,
     Sequential,
+    Malformed,
     Regular
 };
 
