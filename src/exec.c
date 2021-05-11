@@ -50,7 +50,7 @@ int exec_piped_commands(char * line) {
 
     // The status code of each command executed
     // The last one will be returned
-    int status_code;
+    int status_code = 127;
 
     int wait_status;
 
@@ -58,8 +58,9 @@ int exec_piped_commands(char * line) {
         if (i != n_pipes) {
             int rv = pipe(file_descriptors[i]);
             if (rv < 0) {
-                fprintf(stderr, "fvgsh: erro ao inicializar pipe!");
-                return -1;
+                fprintf(stderr, "fvgsh: erro ao inicializar pipe!");                
+                status_code = -1;
+                break;
             }
         }
 
@@ -84,6 +85,7 @@ int exec_piped_commands(char * line) {
                 close(file_descriptors[i-1][READ_END]);
             }
 
+            free(file_descriptors);
             return exec(&tokens);
         }
         // Running on the parent process
@@ -93,14 +95,24 @@ int exec_piped_commands(char * line) {
             close(file_descriptors[i - 1][WRITE_END]);
         }
 
+
+        g_waiting_for_child_proc = true;
+
         if (waitpid(pid, &wait_status, 0) == -1) {
-            fprintf(stderr, "waitpid falhou em exec_simple_command!\n");
+            fprintf(stderr, "waitpid falhou em exec_piped_commands!\n");
             status_code = 127;
         } else if WIFEXITED(wait_status) {
             status_code = WEXITSTATUS(wait_status);
         } else {
             fprintf(stderr, "fvgsh: aviso: processo-filho não terminou normalmente!");
             status_code = 127;
+        }
+        g_waiting_for_child_proc = false;
+
+        if (status_code != 0) {
+            printf("fvgsh: parando execução de cadeia de comandos uma vez que '%s' falhou ou não existe.\n", tokens.data[0]);
+            vec_free(&tokens);
+            break;
         }
 
         vec_free(&tokens);
@@ -125,9 +137,7 @@ int exec_simple_command(char * line) {
     int wait_status;
     if(pid == 0){
         // Runs on the child process
-        execvp(tokens.data[0], tokens.data);
-        fprintf(stderr, "fvgsh: erro ao executar '%s', código %d.\n", tokens.data[0], errno);
-        return errno;
+        return exec(&tokens);
     }
     //parent process
     g_waiting_for_child_proc = true;
