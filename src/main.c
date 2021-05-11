@@ -1,14 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>      // For free
-#include <string.h>      // For strlen
-#include <unistd.h>      // For fork, execvp
-#include <errno.h>       // For errno
-#include <wait.h>        // For wait
 #include "basictypes.h"  // For ARG_MAX
 #include "sighandler.h"  // For init_signal_handler
 #include "userdata.h"    // For user_data_t, get_user_data
 #include "command.h"     // For parse_line
 #include "strvec.h"
+#include "exec.h"
 
 #define RED_ANSI     "\x1b[31m" // ANSI escape code for red
 #define BLUE_ANSI    "\x1b[34m" // ANSI escape code for blue
@@ -66,45 +63,13 @@ int main()
 
         printf("Command type: %s\n", command_types_str[cmd_type]);
 
-        str_vec_t tokens = tokenize(line, " ");
-        for (usize_t i = 0; i < tokens.size; i++) {
-            printf("Token: %s\n", tokens.data[i]);
+        switch (cmd_type) {
+            case Piped: /* TODO! */ break;
+            case Sequential: /* TODO! */ break;
+            case Logical: /* TODO! */ break;
+            case Regular: exec_simple_command(line); break;
         }
 
-        // Input to execvp must be NULL-terminated
-        append_null(&tokens);
-
-//================= TEMPORARY STUFF =======================
-// MAYBE WE SHOULD MOVE THIS TO A FUNCTION IN THE FUTURE
-
-        int pid = fork();
-        if(pid == 0){
-            //child process
-            char * last_token = tokens.data[tokens.size-1];
-            char last_char = last_token[strlen(last_token)];
-            /*
-                TODO: handle "|" "<" ">"
-                    
-                design a logic that uses dup2 to overwrite
-                the standard inputs and outputs to file descriptors
-                associated with pipes (chain of commands)
-
-            */
-            if (last_char == '&') {
-                // TODO: background execution
-            }
-            int status = execvp(tokens.data[0], tokens.data);
-            if (status == -1) {
-                printf("Erro! Código do erro:%d\n", errno);
-            }
-        } else {
-            //parent process
-            g_waiting_for_child_proc = true;
-            wait(NULL);
-        }
-// =================================================================
-        vec_free(&tokens);
-        g_waiting_for_child_proc = false;
         fflush(stdout);
     }
 
