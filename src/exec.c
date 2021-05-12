@@ -11,14 +11,14 @@
 #define WRITE_END 1
 #define READ_END  0
 
-static inline int count_pipes(const char * line) {
-    int pipes = 0;
+static inline int count_ch(const char * line, const char ch) {
+    int counter = 0;
     for (usize_t i = 0; i < strlen(line); i++) {
-        if (line[i] == '|') {
-            pipes++;
+        if (line[i] == ch) {
+            counter++;
         }
     }
-    return pipes;
+    return counter;
 }
 
 static inline int exec(str_vec_t * tokens) {
@@ -28,7 +28,7 @@ static inline int exec(str_vec_t * tokens) {
 }
 
 int exec_piped_commands(char * line) {
-    int n_pipes = count_pipes(line);
+    int n_pipes = count_ch(line,'|');
 
     // If there were N pipe characters then there must be
     // N+1 commands to be run
@@ -159,4 +159,24 @@ int exec_simple_command(char * line) {
     g_waiting_for_child_proc = false;
 
     return ret_val;
+}
+
+int exec_seq_commands(char * line){
+    int i=0, semic_count, n_commands;
+    semic_count = count_ch(line,';'); // count semicolons in command
+    n_commands = semic_count + 1; // N-1 semicolons => N commands to be executed
+
+    assert(semic_count > 0); // ensure that at least one semicolon was found
+
+    str_vec_t commands = tokenize(line, ";"); // break individual commands
+    if (commands.size != (usize_t) n_commands) {
+        fprintf(stderr, "fvgsh: erro de sintaxe.\n");
+        return 127;
+    }
+    for(i=0;i<n_commands;i++){
+        exec_simple_command(commands.data[i]);    
+    }
+    
+    vec_free(&commands);
+    return 0;// success
 }

@@ -3,9 +3,10 @@
 #include "basictypes.h"  // For ARG_MAX
 #include "sighandler.h"  // For init_signal_handler
 #include "userdata.h"    // For user_data_t, get_user_data
-#include "command.h"     // For parse_line
-#include "strvec.h"
-#include "exec.h"
+#include "command.h"     // For parse_line, parse_command_type
+#include "strvec.h"      //
+#include "strutils.h"    // For trim_semic
+#include "exec.h"        // For exec_simple_command, exec_piped_commands
 
 #define RED_ANSI     "\x1b[31m" // ANSI escape code for red
 #define BLUE_ANSI    "\x1b[34m" // ANSI escape code for blue
@@ -60,13 +61,15 @@ int main()
             continue;
         }
 
+        trim_semic(line);//remove final semicolon
+
         command_type_t cmd_type = parse_command_type(line);
 
         printf("Command type: %s\n", command_types_str[cmd_type]);
 
         switch (cmd_type) {
             case Piped: exec_piped_commands(line); break;
-            case Sequential: /* TODO! */ break;
+            case Sequential: exec_seq_commands(line); break;
             case Logical: /* TODO! */ break;
             case Malformed: fprintf(stderr, "fvgsh: erro: no momento não é possível mistura de operadores além de '&&' com '||'.\n"); break;
             case Regular: exec_simple_command(line); break;
