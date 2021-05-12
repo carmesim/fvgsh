@@ -25,3 +25,9 @@ void get_pretty_cwd(char *src, char * str)
         strcpy(src, buf);
     }
 }
+
+void trim_semic(char * str){
+    char lastch = str[strlen(str)-1];
+    if(lastch == ';')
+        str[strlen(str)-1] = '\0';
+}
