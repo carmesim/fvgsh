@@ -17,13 +17,13 @@ void signal_handler(int sig)
     }
     if (sig==SIGINT || sig==SIGHUP)
     {
-        fprintf(stderr, "\nSIGINT (Ctrl+C) received. Code %d. Exiting.", sig);
+        fprintf(stderr, "\nSIGINT (Ctrl+C) received. Code %d. Exiting.\n", sig);
         g_should_exit = true;
     }
 
     if (sig==SIGHUP)
     {
-        fprintf(stderr, "\nSIGHUP received. Code %d. Exiting.", sig);
+        fprintf(stderr, "\nSIGHUP received. Code %d. Exiting.\n", sig);
         g_should_exit = true;
     }
 }

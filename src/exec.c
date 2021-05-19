@@ -127,9 +127,9 @@ int exec_piped_commands(char * line) {
 int exec_simple_command(char * line) {
 
     str_vec_t tokens = tokenize(line, " ");
-    for (usize_t i = 0; i < tokens.size; i++) {
+    /*for (usize_t i = 0; i < tokens.size; i++) {
         printf("Token: %s\n", tokens.data[i]);
-    }
+    }*/
 
     // Input to execvp must be NULL-terminated
     append_null(&tokens);
@@ -179,4 +179,63 @@ int exec_seq_commands(char * line){
     
     vec_free(&commands);
     return 0;// success
+}
+
+int exec_log_commands(char * line){
+    char prev_ch = ' ', *buffer, *rest;
+    size_t i, blen = 0;
+    bool hasCommandOR = false;
+    bool hasCommandAND = false;
+    rest = line;
+    buffer = malloc(strlen(line)*sizeof(char));
+    for (i=0;i<strlen(line);i++){
+        if(prev_ch == '|' && line[i] == '|'){
+            hasCommandOR = true;
+            rest = &line[i+1];
+            break;
+        }else if(prev_ch == '&' && line[i] == '&'){
+            hasCommandAND = true;
+            rest = &line[i+1];
+            break;
+        }else{
+            hasCommandOR = false;
+            hasCommandAND = false;
+            // If we assume that no pipes will be sent, we can 
+            // just skip the next '|' or '&' by doing i++, don't we ?
+            // ----> I'll let someone braver than me do that
+            if (line[i] == '|'){
+                prev_ch = '|';
+            }else if (line[i]== '&'){
+                prev_ch = '&';
+            }else{
+                buffer[blen++] = line[i];
+            }
+        }
+    }
+    buffer[blen] = '\0';
+    if(hasCommandOR){
+        //printf("COMANDO OR-- BUFF: %s REST: %s\n", buffer, rest);
+        int buffer_ret = exec_simple_command(buffer);
+        free(buffer);
+        if(buffer_ret != 0){
+            int rest_ret = exec_log_commands(rest);
+            return buffer_ret || rest_ret;
+        }else{
+            return buffer_ret;
+        }
+    }else if(hasCommandAND){
+        //printf("COMANDO AND:-- BUFF: %s REST: %s\n", buffer, rest);
+        int buffer_ret = exec_simple_command(buffer);
+        free(buffer);
+        if(buffer_ret != 0){
+            return buffer_ret;
+        }else{
+            int rest_ret = exec_log_commands(rest);
+            return buffer_ret && rest_ret;
+        }
+    }else{
+        free(buffer);
+        return exec_simple_command(line);
+    }
+
 }
