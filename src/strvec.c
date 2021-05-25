@@ -73,6 +73,5 @@ str_vec_t tokenize(char * line, const char * sep) {
         ) {
         vec_insert(&tokens, token);
     }
-
     return tokens;
 }

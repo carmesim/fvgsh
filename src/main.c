@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>      // For free
+#include <string.h>      // For strcmp
 #include "basictypes.h"  // For ARG_MAX
 #include "sighandler.h"  // For init_signal_handler
 #include "userdata.h"    // For user_data_t, get_user_data
 #include "command.h"     // For parse_line, parse_command_type
 #include "strvec.h"      //
 #include "strutils.h"    // For trim_semic
-#include "exec.h"        // For exec_simple_command, exec_piped_commands
+#include "exec.h"        // For exec_simple_command, exec_piped_commands, running_jobs
 
 #define RED_ANSI     "\x1b[31m" // ANSI escape code for red
 #define BLUE_ANSI    "\x1b[34m" // ANSI escape code for blue
@@ -34,6 +35,8 @@ int main()
     user_data_t ud = get_user_data();
 
     char ch;
+    
+    joblist_init(&running_jobs);
 
     while(!g_should_exit && !g_waiting_for_child_proc) {
 
@@ -60,6 +63,25 @@ int main()
         if (line[0] == '\0') {
             continue;
         }
+
+        // =============  background execution handling ============
+        if(line[0] == 'f' && line[1] == 'g'){
+            if(running_jobs.size == 0){
+                printf("fg: não já processos rodando em segundo plano\n");
+            }else{
+                restore_command(running_jobs.list[running_jobs.size - 1]);
+            }
+            continue;
+        }
+
+        //always checks if there is something to remove from running_jobs
+        joblist_verify(&running_jobs);
+
+        if(strcmp(line,"jobs") == 0){
+            joblist_print(&running_jobs);
+            continue;
+        }
+        // =============  end of background execution handling ============
 
         trim_semic(line);//remove final semicolon
 

@@ -7,9 +7,13 @@
 #include <assert.h>
 #include "strvec.h"
 #include "sighandler.h" // For g_waiting_for_child_proc
+#include "jobs.h" // For jobList
 
 #define WRITE_END 1
 #define READ_END  0
+
+int lastpid = -1;
+jobList running_jobs;
 
 static inline int count_ch(const char * line, const char ch) {
     int counter = 0;
@@ -126,6 +130,20 @@ int exec_piped_commands(char * line) {
 
 int exec_simple_command(char * line) {
 
+    bool bg_exec = false;
+    int i = strlen(line) - 1;
+    while(i != 0){
+        if(line[i] == '&'){
+            line[i] = '\0';
+            bg_exec = true;
+            break;
+        }else if(line[i] != ' ' && line[i] != '\t'){
+            bg_exec = false;
+            break;
+        }
+        i--;
+    }
+
     str_vec_t tokens = tokenize(line, " ");
     /*for (usize_t i = 0; i < tokens.size; i++) {
         printf("Token: %s\n", tokens.data[i]);
@@ -141,18 +159,23 @@ int exec_simple_command(char * line) {
         return exec(&tokens);
     }
     //parent process
+    if(bg_exec){
+        joblist_insert(&running_jobs, pid, line);
+        printf("[%d] - %d\n",running_jobs.size, pid);
+    }
     g_waiting_for_child_proc = true;
 
-    int ret_val;
-
-    if (waitpid(pid, &wait_status, 0) == -1) {
-        fprintf(stderr, "waitpid falhou em exec_simple_command!\n");
-        ret_val = 127;
-    } else if WIFEXITED(wait_status) {
-        ret_val = WEXITSTATUS(wait_status);
-    } else {
-        fprintf(stderr, "fvgsh: aviso: processo-filho não terminou normalmente!");
-        ret_val = 127;
+    int ret_val = 0; // remove this 0 later 
+    if(!bg_exec){
+        if (waitpid(pid, &wait_status, 0) == -1) {
+            fprintf(stderr, "waitpid falhou em exec_simple_command!\n");
+            ret_val = 127;
+        } else if WIFEXITED(wait_status) {
+            ret_val = WEXITSTATUS(wait_status);
+        } else {
+            fprintf(stderr, "fvgsh: aviso: processo-filho não terminou normalmente!");
+            ret_val = 127;
+        }
     }
 
     vec_free(&tokens);
@@ -238,4 +261,18 @@ int exec_log_commands(char * line){
         return exec_simple_command(line);
     }
 
+}
+
+int restore_command(){
+    int wstatus;
+    job_t cmd_job = running_jobs.list[running_jobs.size -1];
+    printf("%s\n", cmd_job.line);
+    waitpid(cmd_job.pid, &wstatus, 0);
+    printf("[1]+ Concluído\n");
+    if(WIFEXITED(wstatus)){
+        joblist_remove(&running_jobs, cmd_job.pid);
+        return 0;
+    }else{
+        return -1;
+    }
 }
