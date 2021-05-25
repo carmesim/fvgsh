@@ -10,7 +10,8 @@ SOURCES += \
         src/sighandler.c \
         src/strutils.c \
         src/strvec.c \
-        src/userdata.c
+        src/userdata.c \
+        src/jobs.c
 
 HEADERS += \
     src/basictypes.h \
@@ -19,4 +20,5 @@ HEADERS += \
     src/sighandler.h \
     src/strutils.h \
     src/strvec.h \
-    src/userdata.h
+    src/userdata.h \
+    src/jobs.h
