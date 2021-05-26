@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>      // For free
 #include <string.h>      // For strcmp
+#include <unistd.h>
 #include "basictypes.h"  // For ARG_MAX
 #include "sighandler.h"  // For init_signal_handler
 #include "userdata.h"    // For user_data_t, get_user_data
@@ -22,9 +23,9 @@ const char* command_types_str[] = {
     [Malformed] = "Malformed"
 };
 
-static inline void print_prompt(const user_data_t * ud)
+static inline void print_prompt( user_data_t * ud)
 {
-    printf(BLUE_ANSI "%s@%s:" RED_ANSI "%s" BLUE_ANSI "$ " RESET_ANSI, ud->username, ud->hostname, ud->pretty_cwd);
+    printf(BLUE_ANSI "%s@%s:" RED_ANSI "%s" BLUE_ANSI "$ " RESET_ANSI, ud->username, ud->hostname, ud->cwd);
 }
 
 int main()
@@ -32,7 +33,7 @@ int main()
     // Starting up the signal handler
     init_signal_handler();
 
-    user_data_t ud = get_user_data();
+    ud = get_user_data();
 
     char ch;
     
@@ -88,6 +89,8 @@ int main()
         command_type_t cmd_type = parse_command_type(line);
 
         //printf("Command type: %s\n", command_types_str[cmd_type]);
+        //chdir("/home/gustavo/UNIFESP/Sistemas Operacionais/Labs/Shell/unix-shell/nova_pasta");
+        //printf("Command type: %s\n", ud.cwd);
 
         switch (cmd_type) {
             case Piped: exec_piped_commands(line); break;

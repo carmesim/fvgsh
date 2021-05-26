@@ -6,6 +6,7 @@
 #include <stdlib.h>      // For malloc
 #include <assert.h>
 #include "strvec.h"
+#include "userdata.h"
 #include "sighandler.h" // For g_waiting_for_child_proc
 #include "jobs.h" // For jobList
 
@@ -14,6 +15,7 @@
 
 int lastpid = -1;
 jobList running_jobs;
+user_data_t ud;
 
 static inline int count_ch(const char * line, const char ch) {
     int counter = 0;
@@ -145,8 +147,10 @@ int exec_simple_command(char * line) {
     }
 
     str_vec_t tokens = tokenize(line, " ");
+
+    // only for see if the tokens are correct
     /*for (usize_t i = 0; i < tokens.size; i++) {
-        printf("Token: %s\n", tokens.data[i]);
+        printf("Token[%ld]: %s\n", i, tokens.data[i]);
     }*/
 
     // Input to execvp must be NULL-terminated
@@ -154,9 +158,62 @@ int exec_simple_command(char * line) {
 
     int pid = fork();
     int wait_status;
+
+
+
     if(pid == 0){
         // Runs on the child process
-        return exec(&tokens);
+
+        //if user type cd command
+        if (!strcmp(tokens.data[0], "cd")){
+            //here care with cd command with
+            //ud.cwd is the current working directory
+
+            if(strcmp(tokens.data[1], "..") == 0){//up 1 level directory
+                
+                int tam, save_bar = 0, tam_consulta = 0;
+
+                tam_consulta = strlen(ud.cwd);
+
+                for (tam = tam_consulta ; tam > 0; tam--){ //finding the last bar
+                    if (ud.cwd[tam] == '/'){
+                        save_bar = tam;
+                        break;
+                    }
+                }
+
+                ud.cwd[save_bar] = '\0'; //clean the rest of the path
+
+                chdir("..");
+            }
+            else{ //down 1 level directory inside
+                strcat (ud.cwd, "/");
+                strcat(ud.cwd, tokens.data[1]);
+                
+                if (chdir(ud.cwd) == -1){
+                    printf("Diretorio inválido.\n");
+
+                    //clean the path
+
+                    int j;
+
+                    for (j = strlen(ud.cwd); j > 0; j--){
+                        if (ud.cwd[j] == '/'){
+                            ud.cwd[j] = '\0';
+                            break;
+                        }
+                    }
+                }
+            }
+
+
+            return 0;
+        }
+        else{
+            return exec(&tokens);
+        }
+
+
     }
     //parent process
     if(bg_exec){
@@ -196,6 +253,7 @@ int exec_seq_commands(char * line){
         fprintf(stderr, "fvgsh: erro de sintaxe.\n");
         return 127;
     }
+    
     for(i=0;i<n_commands;i++){
         exec_simple_command(commands.data[i]);    
     }
@@ -238,6 +296,7 @@ int exec_log_commands(char * line){
     buffer[blen] = '\0';
     if(hasCommandOR){
         //printf("COMANDO OR-- BUFF: %s REST: %s\n", buffer, rest);
+        
         int buffer_ret = exec_simple_command(buffer);
         free(buffer);
         if(buffer_ret != 0){
@@ -248,6 +307,7 @@ int exec_log_commands(char * line){
         }
     }else if(hasCommandAND){
         //printf("COMANDO AND:-- BUFF: %s REST: %s\n", buffer, rest);
+        
         int buffer_ret = exec_simple_command(buffer);
         free(buffer);
         if(buffer_ret != 0){
@@ -258,6 +318,7 @@ int exec_log_commands(char * line){
         }
     }else{
         free(buffer);
+        
         return exec_simple_command(line);
     }
 
