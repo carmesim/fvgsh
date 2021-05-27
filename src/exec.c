@@ -75,13 +75,7 @@ static inline int change_dir(str_vec_t * tokens, user_data_t * ud) {
     return 0;
 }
 
-static inline int exec(str_vec_t * tokens, user_data_t * ud) {
-
-    if (!strcmp(tokens->data[0], "cd")) {
-        return change_dir(tokens, ud);
-    }
-
-
+static inline int exec(str_vec_t * tokens) {
     execvp(tokens->data[0], tokens->data);
     fprintf(stderr, "fvgsh: erro ao executar '%s', código %d.\n", tokens->data[0], errno);
     return errno;
@@ -146,7 +140,7 @@ int exec_piped_commands(char * line, user_data_t * ud) {
             }
 
             free(file_descriptors);
-            return exec(&tokens, ud);
+            return exec(&tokens);
         }
         // Running on the parent process
         if (i > 0) {
@@ -202,6 +196,12 @@ int exec_simple_command(char * line, user_data_t * ud) {
 
     str_vec_t tokens = tokenize(line, " ");
 
+    if (!strcmp(tokens.data[0], "cd")) {
+        return change_dir(&tokens, ud);
+    }
+
+
+
     // only for see if the tokens are correct
     /*for (usize_t i = 0; i < tokens.size; i++) {
         printf("Token[%ld]: %s\n", i, tokens.data[i]);
@@ -217,7 +217,7 @@ int exec_simple_command(char * line, user_data_t * ud) {
 
     if(pid == 0){
         // Runs on the child process
-        return exec(&tokens, ud);
+        return exec(&tokens);
     }
     //parent process
     if(bg_exec){
