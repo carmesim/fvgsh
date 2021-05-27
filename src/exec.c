@@ -7,8 +7,10 @@
 #include <assert.h>
 #include "strvec.h"
 #include "userdata.h"
-#include "sighandler.h" // For g_waiting_for_child_proc
-#include "jobs.h" // For jobList
+#include "sighandler.h"  // For g_waiting_for_child_proc
+#include "jobs.h"        // For jobList
+#include "strutils.h"    // For get_pretty_cwd
+
 
 #define WRITE_END 1
 #define READ_END  0
@@ -27,13 +29,65 @@ static inline int count_ch(const char * line, const char ch) {
     return counter;
 }
 
-static inline int exec(str_vec_t * tokens) {
+
+static inline int change_dir(str_vec_t * tokens, user_data_t * ud) {
+    //here care with cd command with
+    //ud.cwd is the current working directory
+
+    if (tokens->size == 1) {
+        fprintf(stderr, "fvgsh: cd: falta argumento\n");
+        return 1;
+    }
+
+    if (tokens->size > 2) {
+        fprintf(stderr, "fvgsh: cd: numero excessivo de argumentos\n");
+        return 1;
+    }
+
+    if (!getcwd(ud->cwd, sizeof ud->cwd))
+    {
+        int err = 1;
+        switch (errno) {
+            case EACCES: fprintf(stderr, "fvgsh: permissao negada.\n"); err = 2; break;
+
+            case ELOOP: fprintf(stderr, "fvgsh: Loop de link simbolico encontrado.\n"); err = 3; break;
+
+            case ENAMETOOLONG: fprintf(stderr, "fvgsh: nome do caminho eh longo demais.\n"); err = 4; break;
+
+            case ENOENT: fprintf(stderr, "fvgsh: caminho %s nao existe.\n", tokens->data[1]); err = 5; break;
+
+            case ENOTDIR: fprintf(stderr, "fvgsh: %s nao e um diretorio e nem symlink pra diretorio.\n", tokens->data[1]); err = 6; break;
+        default: break;
+        }
+        return err;
+    }
+
+
+    chdir(tokens->data[1]);
+
+    free(ud->pretty_cwd);
+    ud->pretty_cwd = strdup(ud->cwd);
+    get_pretty_cwd(ud->pretty_cwd, ud->home_dir);
+    printf("home: %s\n", ud->home_dir);
+    printf("cwd: %s\n", ud->cwd);
+    printf("pcwd: %s\n", ud->pretty_cwd);
+
+    return 0;
+}
+
+static inline int exec(str_vec_t * tokens, user_data_t * ud) {
+
+    if (!strcmp(tokens->data[0], "cd")) {
+        return change_dir(tokens, ud);
+    }
+
+
     execvp(tokens->data[0], tokens->data);
     fprintf(stderr, "fvgsh: erro ao executar '%s', código %d.\n", tokens->data[0], errno);
     return errno;
 }
 
-int exec_piped_commands(char * line) {
+int exec_piped_commands(char * line, user_data_t * ud) {
     int n_pipes = count_ch(line,'|');
 
     // If there were N pipe characters then there must be
@@ -92,7 +146,7 @@ int exec_piped_commands(char * line) {
             }
 
             free(file_descriptors);
-            return exec(&tokens);
+            return exec(&tokens, ud);
         }
         // Running on the parent process
         if (i > 0) {
@@ -130,7 +184,7 @@ int exec_piped_commands(char * line) {
     return status_code;
 }
 
-int exec_simple_command(char * line) {
+int exec_simple_command(char * line, user_data_t * ud) {
 
     bool bg_exec = false;
     int i = strlen(line) - 1;
@@ -163,57 +217,7 @@ int exec_simple_command(char * line) {
 
     if(pid == 0){
         // Runs on the child process
-
-        //if user type cd command
-        if (!strcmp(tokens.data[0], "cd")){
-            //here care with cd command with
-            //ud.cwd is the current working directory
-
-            if(strcmp(tokens.data[1], "..") == 0){//up 1 level directory
-                
-                int tam, save_bar = 0, tam_consulta = 0;
-
-                tam_consulta = strlen(ud.cwd);
-
-                for (tam = tam_consulta ; tam > 0; tam--){ //finding the last bar
-                    if (ud.cwd[tam] == '/'){
-                        save_bar = tam;
-                        break;
-                    }
-                }
-
-                ud.cwd[save_bar] = '\0'; //clean the rest of the path
-
-                chdir("..");
-            }
-            else{ //down 1 level directory inside
-                strcat (ud.cwd, "/");
-                strcat(ud.cwd, tokens.data[1]);
-                
-                if (chdir(ud.cwd) == -1){
-                    printf("Diretorio inválido.\n");
-
-                    //clean the path
-
-                    int j;
-
-                    for (j = strlen(ud.cwd); j > 0; j--){
-                        if (ud.cwd[j] == '/'){
-                            ud.cwd[j] = '\0';
-                            break;
-                        }
-                    }
-                }
-            }
-
-
-            return 0;
-        }
-        else{
-            return exec(&tokens);
-        }
-
-
+        return exec(&tokens, ud);
     }
     //parent process
     if(bg_exec){
@@ -241,7 +245,7 @@ int exec_simple_command(char * line) {
     return ret_val;
 }
 
-int exec_seq_commands(char * line){
+int exec_seq_commands(char * line, user_data_t * ud){
     int i=0, semic_count, n_commands;
     semic_count = count_ch(line,';'); // count semicolons in command
     n_commands = semic_count + 1; // N-1 semicolons => N commands to be executed
@@ -255,14 +259,14 @@ int exec_seq_commands(char * line){
     }
     
     for(i=0;i<n_commands;i++){
-        exec_simple_command(commands.data[i]);    
+        exec_simple_command(commands.data[i], ud);
     }
     
     vec_free(&commands);
     return 0;// success
 }
 
-int exec_log_commands(char * line){
+int exec_log_commands(char * line, user_data_t * ud){
     char prev_ch = ' ', *buffer, *rest;
     size_t i, blen = 0;
     bool hasCommandOR = false;
@@ -297,10 +301,10 @@ int exec_log_commands(char * line){
     if(hasCommandOR){
         //printf("COMANDO OR-- BUFF: %s REST: %s\n", buffer, rest);
         
-        int buffer_ret = exec_simple_command(buffer);
+        int buffer_ret = exec_simple_command(buffer, ud);
         free(buffer);
         if(buffer_ret != 0){
-            int rest_ret = exec_log_commands(rest);
+            int rest_ret = exec_log_commands(rest, ud);
             return buffer_ret || rest_ret;
         }else{
             return buffer_ret;
@@ -308,18 +312,18 @@ int exec_log_commands(char * line){
     }else if(hasCommandAND){
         //printf("COMANDO AND:-- BUFF: %s REST: %s\n", buffer, rest);
         
-        int buffer_ret = exec_simple_command(buffer);
+        int buffer_ret = exec_simple_command(buffer, ud);
         free(buffer);
         if(buffer_ret != 0){
             return buffer_ret;
         }else{
-            int rest_ret = exec_log_commands(rest);
+            int rest_ret = exec_log_commands(rest, ud);
             return buffer_ret && rest_ret;
         }
     }else{
         free(buffer);
         
-        return exec_simple_command(line);
+        return exec_simple_command(line, ud);
     }
 
 }

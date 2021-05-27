@@ -25,7 +25,7 @@ const char* command_types_str[] = {
 
 static inline void print_prompt( user_data_t * ud)
 {
-    printf(BLUE_ANSI "%s@%s:" RED_ANSI "%s" BLUE_ANSI "$ " RESET_ANSI, ud->username, ud->hostname, ud->cwd);
+    printf(BLUE_ANSI "%s@%s:" RED_ANSI "%s" BLUE_ANSI "$ " RESET_ANSI, ud->username, ud->hostname, ud->pretty_cwd);
 }
 
 int main()
@@ -33,7 +33,7 @@ int main()
     // Starting up the signal handler
     init_signal_handler();
 
-    ud = get_user_data();
+    user_data_t ud = get_user_data();
 
     char ch;
     
@@ -93,11 +93,11 @@ int main()
         //printf("Command type: %s\n", ud.cwd);
 
         switch (cmd_type) {
-            case Piped: exec_piped_commands(line); break;
-            case Sequential: exec_seq_commands(line); break;
-            case Logical: exec_log_commands(line); break;
+            case Piped: exec_piped_commands(line, &ud); break;
+            case Sequential: exec_seq_commands(line, &ud); break;
+            case Logical: exec_log_commands(line, &ud); break;
             case Malformed: fprintf(stderr, "fvgsh: erro: no momento não é possível mistura de operadores além de '&&' com '||'.\n"); break;
-            case Regular: exec_simple_command(line); break;
+            case Regular: exec_simple_command(line, &ud); break;
         }
 
         fflush(stdout);
@@ -106,6 +106,7 @@ int main()
     // Freeing malloc'd memory
     free(ud.pretty_cwd);
     free(ud.username);
+    free(ud.home_dir);
 
     return 0;
 }

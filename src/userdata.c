@@ -24,7 +24,8 @@ user_data_t get_user_data() {
     getpwuid_r(uid, &pwent, buffer, sizeof buffer, &pwent_ptr);
     ud.username = strdup(pwent.pw_name);
     //! Saves home directory
-    ud.home_dir = pwent.pw_dir;
+    ud.home_dir = strdup(pwent.pw_dir);
+    printf("HOMEDIR = %s\n", ud.home_dir);
     gethostname(ud.hostname, sizeof ud.hostname);
 
     // pretty_cwd must be freed before exit.
