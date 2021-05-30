@@ -44,7 +44,7 @@ static inline int change_dir(str_vec_t * tokens, user_data_t * ud) {
         return 1;
     }
 
-    if (!getcwd(ud->cwd, sizeof ud->cwd))
+    if (chdir(tokens->data[1]) != 0)
     {
         int err = 1;
         switch (errno) {
@@ -62,15 +62,15 @@ static inline int change_dir(str_vec_t * tokens, user_data_t * ud) {
         return err;
     }
 
-
-    chdir(tokens->data[1]);
-
+    if (!getcwd(ud->cwd, sizeof ud->cwd)) {
+        fprintf(stderr, "fvgsh: nao foi possivel obter o caminho atual.\n");
+    }
     free(ud->pretty_cwd);
     ud->pretty_cwd = strdup(ud->cwd);
     get_pretty_cwd(ud->pretty_cwd, ud->home_dir);
-    printf("home: %s\n", ud->home_dir);
-    printf("cwd: %s\n", ud->cwd);
-    printf("pcwd: %s\n", ud->pretty_cwd);
+//    printf("home: %s\n", ud->home_dir);
+//    printf("cwd: %s\n", ud->cwd);
+//    printf("pcwd: %s\n", ud->pretty_cwd);
 
     return 0;
 }
