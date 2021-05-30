@@ -93,7 +93,7 @@ int main()
         //printf("Command type: %s\n", ud.cwd);
 
         switch (cmd_type) {
-            case Piped: exec_piped_commands(line, &ud); break;
+            case Piped: exec_piped_commands(line); break;
             case Sequential: exec_seq_commands(line, &ud); break;
             case Logical: exec_log_commands(line, &ud); break;
             case Malformed: fprintf(stderr, "fvgsh: erro: no momento não é possível mistura de operadores além de '&&' com '||'.\n"); break;

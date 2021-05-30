@@ -81,7 +81,7 @@ static inline int exec(str_vec_t * tokens) {
     return errno;
 }
 
-int exec_piped_commands(char * line, user_data_t * ud) {
+int exec_piped_commands(char * line) {
     int n_pipes = count_ch(line,'|');
 
     // If there were N pipe characters then there must be
@@ -200,6 +200,12 @@ int exec_simple_command(char * line, user_data_t * ud) {
         return change_dir(&tokens, ud);
     }
 
+    if (!strcmp(tokens.data[0], "exit")) {
+        g_should_exit = true;
+        //exit(0);
+        return 0;
+    }
+
 
 
     // only for see if the tokens are correct
@@ -217,7 +223,7 @@ int exec_simple_command(char * line, user_data_t * ud) {
 
     if(pid == 0){
         // Runs on the child process
-        return exec(&tokens);
+        exit(exec(&tokens));
     }
     //parent process
     if(bg_exec){
@@ -241,7 +247,6 @@ int exec_simple_command(char * line, user_data_t * ud) {
 
     vec_free(&tokens);
     g_waiting_for_child_proc = false;
-
     return ret_val;
 }
 

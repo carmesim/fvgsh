@@ -8,7 +8,7 @@ void joblist_init(jobList *jl){
     jl->size = 0;
 }
 void joblist_insert(jobList *jl, int pid, char* line){
-    job_t *job = malloc(sizeof(job_t*));
+    job_t *job = malloc(1*sizeof(job_t));
     job->pid = pid;
     job->line = strdup(line);
     jl->list[jl->size] = *job;
