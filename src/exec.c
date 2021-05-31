@@ -139,7 +139,6 @@ int exec_piped_commands(char * line) {
                 close(file_descriptors[i-1][READ_END]);
             }
 
-            free(file_descriptors);
             return exec(&tokens);
         }
         // Running on the parent process
