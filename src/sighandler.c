@@ -13,18 +13,12 @@ bool g_fg_sighand = false;
 
 void signal_handler(int sig)
 {
-    if (g_waiting_for_child_proc || g_fg_sighand ) {
+    if (g_waiting_for_child_proc || g_fg_sighand) {
         return;
     }
-    if (sig==SIGINT || sig==SIGHUP)
+    if (sig==SIGINT)
     {
         fprintf(stderr, "\nSIGINT (Ctrl+C) received. Code %d. Exiting.\n", sig);
-        g_should_exit = true;
-    }
-
-    if (sig==SIGHUP)
-    {
-        fprintf(stderr, "\nSIGHUP received. Code %d. Exiting.\n", sig);
         g_should_exit = true;
     }
 }
