@@ -23,7 +23,6 @@ command_type_t parse_command_type(const char * line) {
     bool regular = !piped && !logical && !seq;
 
     if(!regular && !xor_3(piped, seq, logical)) {
-        // TODO: por algum motivo issaqui não funciona ainda ;-;
         return Malformed;
     }
 
