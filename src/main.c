@@ -67,11 +67,13 @@ int main()
 
         // =============  background execution handling ============
         if(line[0] == 'f' && line[1] == 'g'){
+            g_fg_sighand = true;
             if(running_jobs.size == 0){
                 printf("fg: não já processos rodando em segundo plano\n");
             }else{
                 restore_command(running_jobs.list[running_jobs.size - 1]);
             }
+            g_fg_sighand = false;
             continue;
         }
 
@@ -87,10 +89,6 @@ int main()
         trim_semic(line);//remove final semicolon
 
         command_type_t cmd_type = parse_command_type(line);
-
-        //printf("Command type: %s\n", command_types_str[cmd_type]);
-        //chdir("/home/gustavo/UNIFESP/Sistemas Operacionais/Labs/Shell/unix-shell/nova_pasta");
-        //printf("Command type: %s\n", ud.cwd);
 
         switch (cmd_type) {
             case Piped: exec_piped_commands(line); break;

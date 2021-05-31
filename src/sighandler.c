@@ -9,10 +9,11 @@ struct sigaction signal_action;
 // Extern variables defined in sighandler.h
 bool g_should_exit = false;
 bool g_waiting_for_child_proc = false;
+bool g_fg_sighand = false;
 
 void signal_handler(int sig)
 {
-    if (g_waiting_for_child_proc) {
+    if (g_waiting_for_child_proc || g_fg_sighand ) {
         return;
     }
     if (sig==SIGINT || sig==SIGHUP)

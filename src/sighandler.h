@@ -12,6 +12,8 @@ extern bool g_should_exit;
 //! Signals that the shell is waiting for a child process to finish
 extern bool g_waiting_for_child_proc;
 
+//! Foreground process has been recovered
+extern bool g_fg_sighand;
 
 
 #endif // SIGHANDLER_H
