@@ -153,7 +153,9 @@ int exec_piped_commands(char * line) {
         g_waiting_for_child_proc = true;
 
         if (waitpid(pid, &wait_status, 0) == -1) {
-            fprintf(stderr, "waitpid falhou em exec_piped_commands!\n");
+            if (!WIFSIGNALED(wait_status)){
+                fprintf(stderr, "waitpid falhou em exec_piped_commands!\n");
+            }
             status_code = 127;
         } else if WIFEXITED(wait_status) {
             status_code = WEXITSTATUS(wait_status);
@@ -235,7 +237,11 @@ int exec_simple_command(char * line, user_data_t * ud) {
     int ret_val = 0; // remove this 0 later 
     if(!bg_exec){
         if (waitpid(pid, &wait_status, 0) == -1) {
-            fprintf(stderr, "waitpid falhou em exec_simple_command!\n");
+            if (!WIFSIGNALED(wait_status)){
+                fprintf(stderr, "waitpid falhou em exec_simple_command!\n");
+            }else{
+                printf("\n");
+            }
             ret_val = 127;
         } else if WIFEXITED(wait_status) {
             ret_val = WEXITSTATUS(wait_status);
