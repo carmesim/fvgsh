@@ -20,7 +20,8 @@ user_data_t get_user_data() {
     struct passwd pwent;
     struct passwd *pwent_ptr;
     char buffer[1024];
-    //! Looks for the UDI on the password databank and saves the result on pwent
+
+    //! Looks for the UID on the password databank and saves the result on pwent
     getpwuid_r(uid, &pwent, buffer, sizeof buffer, &pwent_ptr);
     ud.username = strdup(pwent.pw_name);
     //! Saves home directory
